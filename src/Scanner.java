@@ -114,7 +114,7 @@ public final class Scanner {
   private final HBaseClient client;
   private final byte[] table;
 
-  private boolean is_reversed= false;
+  private boolean is_reversed = false;
 
   /**
    * The key to start scanning from.  An empty array means "start from the
@@ -209,11 +209,11 @@ public final class Scanner {
   /**
   * Specifies if the scan will be in reverse or not
   * @param to_reverse Indication of scan direction. If this is not
-  * invoked, scanning will default to not being reversed
+  * invoked, scanning will default to not being reversed.
   */
-  public void setReversed(boolean to_reverse){
+  public void setReverse(){
     checkScanningNotStarted();
-    this.is_reversed = to_reverse;
+    is_reversed = true;
   }
 
   /**

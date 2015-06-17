@@ -1112,8 +1112,8 @@ final public class TestIntegration {
   }
 
     /**
-            * Simple reverse scan using reverse get of HBase 0.98+
-            * @throws Exception
+     * Simple reverse scan using reverse get of HBase 0.98+.
+     * @throws Exception
     */
     @Test
     public void reverseFetch() throws Exception {
@@ -1131,9 +1131,9 @@ final public class TestIntegration {
                 client.put(put3), client.put(put4), client.put(put6))).join();
         final Scanner rev_scanner = client.newScanner(table);
         rev_scanner.setFamily(family);
-        rev_scanner.setStartKey("rf3");
-        rev_scanner.setStopKey("rf1");
-        rev_scanner.setReversed(true);
+        rev_scanner.setStartKey("rf3");  // StartKey is inclusive
+        rev_scanner.setStopKey("rf1");   // StopKey is exclusive
+        rev_scanner.setReverse();
 
         final ArrayList<ArrayList<KeyValue>> rev_rows = rev_scanner.nextRows().join();
 
@@ -1141,9 +1141,11 @@ final public class TestIntegration {
         ArrayList<KeyValue> kvs = rev_rows.get(0); // KV from 'rf3'
         assertSizeIs(2, kvs);
         assertEq("v5", kvs.get(0).value());
+        assertEq("v6", kvs.get(1).value());
         kvs = rev_rows.get(1); // KV from 'rf2'
         assertSizeIs(2, kvs);
         assertEq("v3", kvs.get(0).value());
+        assertEq("v4", kvs.get(1).value());
 
     }
 
