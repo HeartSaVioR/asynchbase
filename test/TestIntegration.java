@@ -1468,6 +1468,7 @@ final public class TestIntegration {
 
   }
 
+
   /** Regression test for issue #2. */
   @Test
   public void regression2() throws Exception {
