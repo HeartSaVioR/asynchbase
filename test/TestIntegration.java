@@ -26,6 +26,12 @@
  */
 package org.hbase.async;
 
+import java.lang.Exception;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -86,6 +92,10 @@ import org.hbase.async.TableNotFoundException;
 import org.hbase.async.TimestampsFilter;
 import org.hbase.async.ValueFilter;
 import org.hbase.async.Common;
+
+import org.apache.hadoop.hbase.util.RegionSplitter;
+
+import org.hbase.async.test.Common;
 
 /**
  * Basic integration and regression tests for asynchbase.
@@ -1468,6 +1478,21 @@ final public class TestIntegration {
 
   }
 
+  @Test
+  // verify that there is two regions, after split
+  public void reverseAcrossRegions() throws Exception {
+    client.setFlushInterval(FAST_FLUSH);
+    final String table1 = args[0] + "1";
+    final PutRequest put1 = new PutRequest(table1, "rmt1", family, "q1", "val0");
+    client.put(put1).join();
+    final PutRequest put2 = new PutRequest(table1, "rmt2", family, "q2", "val1");
+    client.put(put2).join();
+
+    byte[] start_key = "rmt1".getBytes();
+    byte[] end_key = "rmt2".getBytes();
+    byte[] rs = new RegionSplitter.UniformSplit().split(start_key, end_key);
+    LOG.info("this is rs " + rs);
+  }
 
   /** Regression test for issue #2. */
   @Test
