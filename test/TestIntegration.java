@@ -441,7 +441,7 @@ final public class TestIntegration {
   }
 
   /** Write a few KVs and delete them in one batch */
-  //@Test
+  @Test
   public void multiDelete() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final PutRequest put2 = new PutRequest(table, "mdk1", family, "q2", "val2");
@@ -677,7 +677,7 @@ final public class TestIntegration {
   }
 
   /** Increment coalescing with negative values and underflows. */
-  //@Test
+  @Test
   public void incrementCoalescingWithUnderflowingAmounts() throws Exception {
     client.setFlushInterval(SLOW_FLUSH);
     final byte[] table = TestIntegration.table.getBytes();
@@ -705,7 +705,7 @@ final public class TestIntegration {
   }
 
   /** Increment coalescing where the coalesced sum ends up being zero. */
-  //@Test
+  @Test
   public void incrementCoalescingWithZeroSumAmount() throws Exception {
     client.setFlushInterval(SLOW_FLUSH);
     final byte[] table = TestIntegration.table.getBytes();
@@ -754,7 +754,7 @@ final public class TestIntegration {
   }
 
   /** Test regexp-based row key filtering.  */
-  //@Test
+  @Test
   public void keyRegexpFilter() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final PutRequest put1 = new PutRequest(table, "krf accept:by the filter",
@@ -890,7 +890,7 @@ final public class TestIntegration {
   }
 
   /** Simple column prefix filter tests.  */
-  //@Test
+  @Test
   public void columnPrefixFilter() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     // Keep only rows with a column qualifier that starts with "qa".
@@ -917,7 +917,7 @@ final public class TestIntegration {
   }
 
   /** Simple column range filter tests.  */
-  //@Test
+  @Test
   public void columnRangeFilter() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     // Keep rows that have a qualifier in between "qb" (inclusive) and "qd4"
@@ -943,7 +943,7 @@ final public class TestIntegration {
     assertEq("v3", kvs.get(0).value());
   }
 
-  //@Test
+  @Test
   public void filterComparators() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final PutRequest put1 = new PutRequest(table, "fc1", family, "a", "v1");
@@ -1013,7 +1013,7 @@ final public class TestIntegration {
     assertEq("v2", substring_rows.get(0).get(0).value());
   }
 
-  //@Test
+  @Test
   public void compareFilters() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final PutRequest put1 = new PutRequest(table, "cf1", family, "a", "v1");
@@ -1112,7 +1112,7 @@ final public class TestIntegration {
   }
 
   /** Simple column filter list tests.  */
- // @Test
+  @Test
   public void filterList() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     // Keep rows that have both:
@@ -1153,7 +1153,7 @@ final public class TestIntegration {
   }
 
   /** Simple timestamps filter list tests.  */
-  //@Test
+  @Test
   public void timestampsFilter() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final byte[] tableBytes = Bytes.UTF8(table);
@@ -1465,7 +1465,7 @@ final public class TestIntegration {
   }
 
   /** Regression test for issue #2. */
-  //@Test
+  @Test
   public void regression2() throws Exception {
     try {
       final PutRequest put1 = new PutRequest(table, "k1", family, "q", "val1");
@@ -1486,7 +1486,7 @@ final public class TestIntegration {
   }
 
   /** Regression test for issue #25. */
-  //@Test
+  @Test
   public void regression25() throws Exception {
     client.setFlushInterval(FAST_FLUSH);
     final String table1 = args[0] + "1";
@@ -1510,7 +1510,7 @@ final public class TestIntegration {
   }
 
   /** Regression test for issue #40 (which was actually Netty bug #474). */
-  //@Test
+  @Test
   public void regression40() throws Exception {
     // Cause a META lookup first to avoid some DEBUG-level spam due to the
     // long key below.
@@ -1538,7 +1538,7 @@ final public class TestIntegration {
   }
 
   /** Regression test for issue #41. */
-  //@Test
+  @Test
   public void regression41() throws Exception {
     client.setFlushInterval(SLOW_FLUSH);
     final byte[] table = TestIntegration.table.getBytes();
