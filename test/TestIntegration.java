@@ -1508,6 +1508,7 @@ final public class TestIntegration {
     rev_scanner.setReverse();
     rev_scanner.setMaxNumKeyValues(2); // Sets the max number of KVs returned per row
     rev_scanner.setStartKey("rsmk3");
+    rev_scanner.setStopKey("rsmk");
 
     ArrayList<ArrayList<KeyValue>> rows = rev_scanner.nextRows().join();
     assertSizeIs(3, rows);
@@ -1519,6 +1520,7 @@ final public class TestIntegration {
     Scanner for_scanner = client.newScanner(table);
     for_scanner.setMaxNumKeyValues(2);
     for_scanner.setStartKey("rsmk0");
+    for_scanner.setStopKey("rsmk4");
     rows = for_scanner.nextRows().join();
     assertSizeIs(3, rows);
     assertEq("val0", rows.get(0).get(0).value());
