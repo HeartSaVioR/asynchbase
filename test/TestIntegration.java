@@ -1160,6 +1160,52 @@ final public class TestIntegration {
     assertEq("v4", kvs.get(0).value());
   }
 
+  /**
+   * Simple column filter list tests on reversed scan.
+   * Covers various filter tests on reversed scan at once.
+   */
+  @Test
+  public void filterListOnReversedScan() throws Exception {
+    client.setFlushInterval(FAST_FLUSH);
+    // Keep rows that have both:
+    //   - a row key that is exactly either "fl1" or "fl2".
+    //   - a qualifier in between "qb" (inclusive) and "qd4" (exclusive).
+    final ArrayList<ScanFilter> filters = new ArrayList<ScanFilter>(2);
+    filters.add(new ColumnRangeFilter("qb", true, "qd4", false));
+    filters.add(new KeyRegexpFilter("flr[12]$"));
+    // Filtered out as we're looking due to qualifier being out of range:
+    final PutRequest put1 = new PutRequest(table, "flr1", family, "qa1", "v1");
+    // Kept by the filter:
+    final PutRequest put2 = new PutRequest(table, "flr1", family, "qb2", "v2");
+    // Filtered out because the row key doesn't match the regexp:
+    final PutRequest put3 = new PutRequest(table, "flr1a", family, "qb3", "v3");
+    // Kept by the filter:
+    final PutRequest put4 = new PutRequest(table, "flr2", family, "qc4", "v4");
+    // Filtered out because the qualifier is on the exclusive upper bound:
+    final PutRequest put5 = new PutRequest(table, "flr2", family, "qd4", "v5");
+    // Filtered out because the qualifier is past the upper bound:
+    final PutRequest put6 = new PutRequest(table, "flr2", family, "qd6", "v6");
+    Deferred.group(Deferred.group(client.put(put1), client.put(put2),
+                                  client.put(put3)),
+                   Deferred.group(client.put(put4), client.put(put5),
+                                  client.put(put6))).join();
+    final Scanner scanner = client.newScanner(table);
+    scanner.setFamily(family);
+    scanner.setStartKey("flr9");
+    scanner.setStopKey("flr0");
+    scanner.setReverse();
+    scanner.setFilter(new FilterList(filters));
+    final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    assertSizeIs(2, rows);  // One KV from row "flr1" and one from "flr2".
+    ArrayList<KeyValue> kvs = rows.get(0);
+    assertSizeIs(1, kvs);   // KV from "flr2":
+    assertEq("v4", kvs.get(0).value());
+    kvs = rows.get(1);
+    assertSizeIs(1, kvs);   // KV from "flr1":
+    assertEq("v2", kvs.get(0).value());
+    scanner.close().join();
+  }
+
   /** Simple timestamps filter list tests.  */
   @Test
   public void timestampsFilter() throws Exception {
