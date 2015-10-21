@@ -441,6 +441,7 @@ final public class TestIntegration {
     scanner.setFamily(family);
     scanner.setQualifiers(new byte[][] { { 'a' }, { 'c' } });
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows(2).join();
+    scanner.close().join();
     assertSizeIs(1, rows);
     final ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(2, kvs);
@@ -779,6 +780,7 @@ final public class TestIntegration {
     scanner.setStopKey("krf!");
     scanner.setKeyRegexp("[Aa]ccept(ed)?");
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);
     ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(1, kvs);
@@ -914,6 +916,7 @@ final public class TestIntegration {
     scanner.setStopKey("cpf3");
     scanner.setFilter(new ColumnPrefixFilter("qa"));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);
     ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(2, kvs);
@@ -942,6 +945,7 @@ final public class TestIntegration {
     scanner.setStopKey("crf3");
     scanner.setFilter(new ColumnRangeFilter("qb", true, "qd4", false));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);  // One KV from row "fl1" and one from "fl2".
     ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(1, kvs);
@@ -966,6 +970,7 @@ final public class TestIntegration {
         new RowFilter(CompareOp.LESS, new BinaryComparator(Bytes.UTF8("fc2"))));
     final ArrayList<ArrayList<KeyValue>> binary_rows =
         binary_scanner.nextRows().join();
+    binary_scanner.close().join();
     assertSizeIs(1, binary_rows);
     assertSizeIs(1, binary_rows.get(0));
     assertEq("v1", binary_rows.get(0).get(0).value());
@@ -978,6 +983,7 @@ final public class TestIntegration {
             new BinaryPrefixComparator(Bytes.UTF8("fc2"))));
     final ArrayList<ArrayList<KeyValue>> prefix_rows =
         prefix_scanner.nextRows().join();
+    prefix_scanner.close().join();
     assertSizeIs(2, prefix_rows);
     assertSizeIs(1, prefix_rows.get(0));
     assertEq("v2", prefix_rows.get(0).get(0).value());
@@ -992,6 +998,7 @@ final public class TestIntegration {
             new BitComparator(Bytes.UTF8("fc2"), BitComparator.BitwiseOp.XOR)));
     final ArrayList<ArrayList<KeyValue>> bit_rows =
         bit_scanner.nextRows().join();
+    bit_scanner.close().join();
     assertSizeIs(2, bit_rows);
     assertSizeIs(1, bit_rows.get(0));
     assertEq("v1", bit_rows.get(0).get(0).value());
@@ -1005,6 +1012,7 @@ final public class TestIntegration {
         new RowFilter(CompareOp.EQUAL, new RegexStringComparator("fc2")));
     final ArrayList<ArrayList<KeyValue>> regex_rows =
         regex_scanner.nextRows().join();
+    regex_scanner.close().join();
     assertSizeIs(1, regex_rows);
     assertSizeIs(1, regex_rows.get(0));
     assertEq("v2", regex_rows.get(0).get(0).value());
@@ -1016,6 +1024,7 @@ final public class TestIntegration {
         new RowFilter(CompareOp.EQUAL, new SubstringComparator("2")));
     final ArrayList<ArrayList<KeyValue>> substring_rows =
         substring_scanner.nextRows().join();
+    substring_scanner.close().join();
     assertSizeIs(1, substring_rows);
     assertSizeIs(1, substring_rows.get(0));
     assertEq("v2", substring_rows.get(0).get(0).value());
@@ -1051,6 +1060,7 @@ final public class TestIntegration {
         new RowFilter(CompareOp.NOT_EQUAL, new BinaryComparator(Bytes.UTF8("cf2"))));
     final ArrayList<ArrayList<KeyValue>> row_rows =
         row_scanner.nextRows().join();
+    row_scanner.close().join();
     assertSizeIs(2, row_rows);
     assertSizeIs(1, row_rows.get(0));
     assertEq("v1", row_rows.get(0).get(0).value());
@@ -1064,6 +1074,7 @@ final public class TestIntegration {
             new BinaryComparator(Bytes.UTF8("aSomeOtherFamily"))));
     final ArrayList<ArrayList<KeyValue>> family_rows =
         family_scanner.nextRows().join();
+    family_scanner.close().join();
     assertNull(family_rows);
 
     final Scanner qualifier_scanner = client.newScanner(table);
@@ -1074,6 +1085,7 @@ final public class TestIntegration {
             new BinaryComparator(Bytes.UTF8("b"))));
     final ArrayList<ArrayList<KeyValue>> qualifier_rows =
         qualifier_scanner.nextRows().join();
+    qualifier_scanner.close().join();
     assertSizeIs(1, qualifier_rows);
     assertSizeIs(2, qualifier_rows.get(0));
     assertEq("v3", qualifier_rows.get(0).get(0).value());
@@ -1087,6 +1099,7 @@ final public class TestIntegration {
             new BinaryComparator(Bytes.UTF8("v3"))));
     final ArrayList<ArrayList<KeyValue>> value_rows =
         value_scanner.nextRows().join();
+    value_scanner.close().join();
     assertSizeIs(1, value_rows);
     assertSizeIs(2, value_rows.get(0));
     assertEq("v3", value_rows.get(0).get(0).value());
@@ -1098,6 +1111,7 @@ final public class TestIntegration {
         new DependentColumnFilter(Bytes.UTF8(family), Bytes.UTF8("dep")));
     final ArrayList<ArrayList<KeyValue>> dependent_rows =
         dependent_scanner.nextRows().join();
+    dependent_scanner.close().join();
     assertSizeIs(1, dependent_rows);
     assertSizeIs(2, dependent_rows.get(0));
     assertEq("v3", dependent_rows.get(0).get(0).value());
@@ -1114,6 +1128,7 @@ final public class TestIntegration {
             new BinaryComparator(Bytes.UTF8("v4"))));
     final ArrayList<ArrayList<KeyValue>> dependent_value_rows =
         dependent_value_scanner.nextRows().join();
+    dependent_value_scanner.close().join();
     assertSizeIs(1, dependent_value_rows);
     assertSizeIs(1, dependent_value_rows.get(0));
     assertEq("v3", dependent_value_rows.get(0).get(0).value());
@@ -1151,6 +1166,7 @@ final public class TestIntegration {
     scanner.setStopKey("fl9");
     scanner.setFilter(new FilterList(filters));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);  // One KV from row "fl1" and one from "fl2".
     ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(1, kvs);   // KV from "fl1":
@@ -1196,6 +1212,7 @@ final public class TestIntegration {
     scanner.setReverse();
     scanner.setFilter(new FilterList(filters));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);  // One KV from row "flr1" and one from "flr2".
     ArrayList<KeyValue> kvs = rows.get(0);
     assertSizeIs(1, kvs);   // KV from "flr2":
@@ -1203,7 +1220,6 @@ final public class TestIntegration {
     kvs = rows.get(1);
     assertSizeIs(1, kvs);   // KV from "flr1":
     assertEq("v2", kvs.get(0).value());
-    scanner.close().join();
   }
 
   /** Simple timestamps filter list tests.  */
@@ -1226,6 +1242,7 @@ final public class TestIntegration {
     scanner.setStopKey(Bytes.UTF8("tf4"));
     scanner.setFilter(new TimestampsFilter(1L, 3L));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows);
     assertSizeIs(1, rows.get(0));
     assertEq("v1", rows.get(0).get(0).value());
@@ -1416,6 +1433,7 @@ final public class TestIntegration {
     rev_scanner.setReverse();
 
     final ArrayList<ArrayList<KeyValue>> rev_rows = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
 
     assertSizeIs(3, rev_rows);
 
@@ -1433,7 +1451,6 @@ final public class TestIntegration {
     assertSizeIs(2, kvs);
     assertEq("v1", kvs.get(0).value());
     assertEq("v2", kvs.get(1).value());
-    rev_scanner.close().join();
   }
 
 
@@ -1454,6 +1471,7 @@ final public class TestIntegration {
     scan.setReverse();
 
     ArrayList<ArrayList<KeyValue>> rows = scan.nextRows().join();
+    scan.close().join();
     assertSizeIs(1, rows);
     assertEq("val0", rows.get(0).get(0).value());
     assertEq("val1", rows.get(0).get(1).value());
@@ -1478,6 +1496,7 @@ final public class TestIntegration {
     rev_scanner.setStopKey("rfc0");
     rev_scanner.setReverse();
     final ArrayList<ArrayList<KeyValue>> rev_rows = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     assertSizeIs(3, rev_rows);
 
     final Scanner forward_scanner = client.newScanner(table);
@@ -1485,6 +1504,7 @@ final public class TestIntegration {
     forward_scanner.setStartKey("rfc0");
     forward_scanner.setStopKey("rfc9");
     final ArrayList<ArrayList<KeyValue>> forward_rows = forward_scanner.nextRows().join();
+    forward_scanner.close().join();
     assertSizeIs(3, forward_rows);
 
     ArrayList<KeyValue> rev_row;
@@ -1498,8 +1518,6 @@ final public class TestIntegration {
       assertEq("v"+i, rev_row.get(0).value());
       assertEq("v"+i , forward_row.get(0).value());
     }
-    rev_scanner.close().join();
-    forward_scanner.close().join();
   }
 
   /** Reverse scans on two tables with same data. */
@@ -1531,6 +1549,8 @@ final public class TestIntegration {
 
     final ArrayList<ArrayList<KeyValue>> table_1_rows = rev_scanner_1.nextRows().join();
     final ArrayList<ArrayList<KeyValue>> table_2_rows = rev_scanner_2.nextRows().join();
+    rev_scanner_1.close().join();
+    rev_scanner_2.close().join();
 
     assertSizeIs(2, table_1_rows);
     assertSizeIs(2,table_2_rows);
@@ -1540,9 +1560,6 @@ final public class TestIntegration {
       assertEq("val"+i, table_1_rows.get(1-i).get(0).value());
       assertEq("val"+i, table_2_rows.get(1-i).get(0).value());
     }
-
-    rev_scanner_1.close().join();
-    rev_scanner_2.close().join();
 
   }
 
@@ -1574,9 +1591,9 @@ final public class TestIntegration {
     assertEq("val2", row.get(2).get(0).value());
 
     row = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(1, row);
     assertEq("val3", row.get(0).get(0).value());
-    scanner.close().join();
   }
 
   /** Reverse scan across two regions. */
@@ -1606,10 +1623,10 @@ final public class TestIntegration {
     assertEq("val2", row.get(0).get(0).value());
 
     row = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     assertSizeIs(2, row);
     assertEq("val1", row.get(0).get(0).value());
     assertEq("val0", row.get(1).get(0).value());
-    rev_scanner.close().join();
   }
 
   /** Reverse scan across three regions. */
@@ -1648,9 +1665,9 @@ final public class TestIntegration {
     assertEq("val1", row.get(1).get(0).value());
 
     row = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     assertSizeIs(1, row);
     assertEq("val0", row.get(0).get(0).value());
-    rev_scanner.close().join();
   }
 
   /**
@@ -1717,6 +1734,7 @@ final public class TestIntegration {
     scanner.setStartKey("css0");
     scanner.setStopKey("css0");
     ArrayList<ArrayList<KeyValue>> row = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(1, row);
     assertEq("val0", row.get(0).get(0).value());
 
@@ -1726,12 +1744,11 @@ final public class TestIntegration {
     rev_scanner.setStopKey("css0");
     rev_scanner.setReverse();
     ArrayList<ArrayList<KeyValue>> rev_row = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     if (rev_row == null){
       rev_row = new ArrayList<ArrayList<KeyValue>> ();
     }
     assertSizeIs(0, rev_row);
-    scanner.close().join();
-    rev_scanner.close().join();
   }
 
   /** 
@@ -1756,6 +1773,7 @@ final public class TestIntegration {
     rev_scanner.setStartKey("scop1");
     rev_scanner.setReverse();
     ArrayList<ArrayList<KeyValue>> rows = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     assertSizeIs(2, rows);
     assertEq("val1", rows.get(0).get(0).value());
     assertEq("val0", rows.get(1).get(0).value());
@@ -1764,11 +1782,10 @@ final public class TestIntegration {
     rev_scanner_2.setReverse();
     rev_scanner_2.setStopKey("scop1");
     rows = rev_scanner_2.nextRows().join();
+    rev_scanner_2.close().join();
     assertSizeIs(2, rows);
     assertEq("val3", rows.get(0).get(0).value());
     assertEq("val2", rows.get(1).get(0).value());
-    rev_scanner.close().join();
-    rev_scanner_2.close().join();
   }
 
   /** Reverse scan across two regions 1) without stop key (scanning to the beginning of the table)
@@ -1855,6 +1872,7 @@ final public class TestIntegration {
     // KeyValue size: key is 5 bytes + family: 1 + qualifier: 2 + value:9 + timestamp: 8 = 25 bytes
     // JVM adds around 40 bytes for each object so total is around 65 bytes
     ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
+    scanner.close().join();
     assertSizeIs(2, rows); 
     // Even though 5 KVs is more than 250 bytes, we verify that HBase does not
     // truncate rows in the middle
@@ -1888,6 +1906,7 @@ final public class TestIntegration {
     rev_scanner.setStopKey("rsmk");
 
     ArrayList<ArrayList<KeyValue>> rows = rev_scanner.nextRows().join();
+    rev_scanner.close().join();
     assertSizeIs(3, rows);
     assertEq("val3", rows.get(0).get(0).value());
     assertEq("val0", rows.get(1).get(0).value()); // Reversed scanner still returns columns in forward order
@@ -1899,6 +1918,7 @@ final public class TestIntegration {
     for_scanner.setStartKey("rsmk0");
     for_scanner.setStopKey("rsmk4");
     rows = for_scanner.nextRows().join();
+    for_scanner.close().join();
     assertSizeIs(3, rows);
     assertEq("val0", rows.get(0).get(0).value());
     assertEq("val1", rows.get(0).get(1).value());
