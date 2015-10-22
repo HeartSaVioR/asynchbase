@@ -71,11 +71,18 @@ final class RegionInfo implements Comparable<RegionInfo> {
       this.stop_key = stop_key;
     }
 
-    final byte[] start_key = startKeyFromRegionName(region_name);
-    if (start_key.length == 0){
-      this.start_key = EMPTY_ARRAY;
+    // XXX It's for passing TestMultiAction.addErrors().
+    // If region_name is null or empty, throw proper Exception,
+    // since it should be not possible in real HBase.
+    if (region_name != null && region_name.length > 0) {
+      final byte[] start_key = startKeyFromRegionName(region_name);
+      if (start_key.length == 0){
+        this.start_key = EMPTY_ARRAY;
+      } else {
+        this.start_key = start_key;
+      }
     } else {
-      this.start_key = start_key;
+      this.start_key = EMPTY_ARRAY;
     }
   }
 

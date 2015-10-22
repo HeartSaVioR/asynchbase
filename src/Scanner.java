@@ -1219,18 +1219,21 @@ public final class Scanner {
    * deferred {@link Scanner.Response} if HBase 0.95 and up.
    */
   private Deferred<Object> openReverseScanner(){
-    return client.locateRegionBeforeKey(table, start_key).addCallbacks(
+    return client.locateRegionBeforeKey(this.getOpenRequest(), table, start_key).addCallbacks(
       new Callback<Object, Object> () {
         public Object call(final Object  arg) {
           if (arg instanceof ArrayList){
             @SuppressWarnings("unchecked")
             byte[] new_start_key = HBaseClient.processPreviousRegion((ArrayList<KeyValue>)arg);
-                        
+
             return client.openScanner(Scanner.this,
               new OpenScannerRequest(Scanner.this.table, new_start_key));
           }
-          else{
-            return Deferred.fromResult(null);
+          else {
+            LOG.debug("Received {}", arg);
+            // XXX We can retry to get region in the next time. Do it now!
+            LOG.debug("Cannot get region information from locateRegionBeforeKey, maybe lose the race, do it again.");
+            return openReverseScanner();
           }
     }},
     new Callback<Object, Object> (){
@@ -1240,7 +1243,7 @@ public final class Scanner {
         return error;
       }
 
-        public String toString(){
+      public String toString(){
           return "openReverseScanner errback";
         }
     }
