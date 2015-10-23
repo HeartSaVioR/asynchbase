@@ -919,7 +919,8 @@ public final class Scanner {
 
   private Deferred<ArrayList<ArrayList<KeyValue>>> scanFinished(final Response resp) {
     final byte[] region_stop_key = region.stopKey();
-    final byte[] region_start_key = region.startKey();
+    final byte[] region_start_key = RegionInfo.startKeyFromRegionName(
+            region.name());
     // Check to see if this region is the last we should scan (either
     // because (1) it's the last region or (3) because its stop_key is
     // greater than or equal to the stop_key of this scanner provided
@@ -990,7 +991,7 @@ public final class Scanner {
     // Continue scanning from the next region's start key
     // Dependent on direction of scan
     if (is_reversed){
-      start_key = region.startKey();
+      start_key = RegionInfo.startKeyFromRegionName(region.name());
     } else{
       start_key = region.stopKey();
     }
