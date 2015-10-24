@@ -734,10 +734,12 @@ public final class Scanner {
       return Deferred.fromResult(null);
     } else if (region == null) {  // We need to open the scanner first.
       if (this.getReversed() && !this.isFirstReverseRegion()){
-        return openReverseScanner().addCallbackDeferring(opened_scanner);
+        return client.openReverseScanner(this)
+                .addCallbackDeferring(opened_scanner);
       } else {
         if (is_reversed && start_key == EMPTY_ARRAY){
-          start_key = Bytes.createMaxByteArray(Short.MAX_VALUE - table.length - 3);
+          start_key = Bytes.createMaxByteArray(Short.MAX_VALUE - table.length
+                  - 3);
         }
         return client.openScanner(this).addCallbackDeferring(opened_scanner);
       }
@@ -1121,6 +1123,15 @@ public final class Scanner {
     return new OpenScannerRequest();
   }
 
+  /**
+   * Returns an RPC to open this scanner for reverse scan.
+   * Reverse scan pequires to open scanner with region start key,
+   * but have to preserve start key for real scan.
+   * @param region_start_key region's start key
+   */
+  HBaseRpc getOpenRequestForReverseScan(final byte[] region_start_key) {
+    return new OpenScannerRequest(table, region_start_key);
+  }
 
   /**
    * Returns an RPC to close this scanner.
@@ -1211,35 +1222,6 @@ public final class Scanner {
       }
     }
     return rows;
-  }
-
-  /**
-   * Called instead of openScanner() in order to do an additional META lookup to find
-   * next region we will be scanning.
-   * @return A deferred scanner ID (long) if HBase 0.94 and before, or a
-   * deferred {@link Scanner.Response} if HBase 0.95 and up.
-   */
-  private Deferred<Object> openReverseScanner(){
-    return client.locateRegionBeforeKey(this.getOpenRequest(), table, start_key)
-             .addCallbacks(new Callback<Object, Object> () {
-               public Object call(final Object arg) {
-                 return client.openScanner(Scanner.this,
-                   new OpenScannerRequest(Scanner.this.table,
-                     ((RegionLocation)arg).startKey()));
-        }
-    },
-    new Callback<Object, Object> (){
-      public Object call(final Object error){
-        LOG.info("Lookup to construct reverse scanner failed on table " +
-          Bytes.pretty(table) + " and start key " + Bytes.pretty(start_key));
-        return error;
-      }
-
-        public String toString(){
-          return "openReverseScanner errback";
-        }
-    }
-    );
   }
 
   /** RPC method name to use with HBase 0.95+.  */

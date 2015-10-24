@@ -260,7 +260,7 @@ final class RegionInfo implements Comparable<RegionInfo> {
     // Otherwise, return an empty string as start key aka this is the 
     // start key for the first region in the table.
     else {
-      return Arrays.copyOfRange(region_name, key_begin, key_begin);
+      return EMPTY_ARRAY;
     }
 
   }

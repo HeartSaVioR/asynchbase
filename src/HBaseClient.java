@@ -1270,7 +1270,40 @@ public final class HBaseClient {
           return "openScanner errback";
         }
       });
-    }
+  }
+
+  /**
+   * Called instead of openScanner() in order to do an additional META lookup
+   * to find next region we will be scanning.
+   * @param scanner The scanner to open.
+   * @return A deferred scanner ID (long) if HBase 0.94 and before, or a
+   * deferred {@link Scanner.Response} if HBase 0.95 and up.
+   */
+  Deferred<Object> openReverseScanner(final Scanner scanner){
+    return locateRegionBeforeKey(
+            scanner.getOpenRequest(), scanner.table(), scanner.startKey())
+            .addCallbacks(
+                    new Callback<Object, Object>() {
+                      public Object call(final Object arg) {
+                        return openScanner(scanner,
+                                scanner.getOpenRequestForReverseScan(
+                                        ((RegionLocation) arg).startKey()));
+                      }
+                    },
+                    new Callback<Object, Object>() {
+                      public Object call(final Object error) {
+                        LOG.info("Lookup to construct reverse scanner failed on table " +
+                                Bytes.pretty(scanner.table()) + " and start key " +
+                                Bytes.pretty(scanner.startKey()));
+                        return error;
+                      }
+
+                      public String toString() {
+                        return "openReverseScanner errback";
+                      }
+              }
+            );
+  }
 
   /** Singleton callback to handle responses of "openScanner" RPCs.  */
   private static final Callback<Object, Object> scanner_opened =
@@ -2143,7 +2176,7 @@ public final class HBaseClient {
   public Deferred<List<RegionLocation>> locateRegions(final String table) {
     return locateRegions(table.getBytes());
   }
-  
+
   /**
    * Searches the meta table for all of the regions associated with the given
    * table. This method does not use the cache, rather it will scan HBase every
