@@ -1280,7 +1280,7 @@ public final class HBaseClient {
    * deferred {@link Scanner.Response} if HBase 0.95 and up.
    */
   Deferred<Object> openReverseScanner(final Scanner scanner){
-    return locateRegionBeforeKey(
+    return locateRegionClosestBeforeKey(
             scanner.getOpenRequest(), scanner.table(), scanner.startKey())
             .addCallbacks(
                     new Callback<Object, Object>() {
@@ -2221,13 +2221,17 @@ public final class HBaseClient {
   // --------------------------------------------------- //
 
   /**
+   * Locate the region which has the row that's less than or equal to the given row.
+   *
+   * @param request The RPC that's hunting for a region.
    * @param table The table we are trying to locate the region in.
    * @param key The row key for which we want to locate the previous region.
-   * @return A deferred callback when the lookup completes. This carries an 
+   * @return A deferred callback when the lookup completes. This carries a 
+   * {@link RegionLocation}.
    * unspecified result that should resolve to an ArrayList that can be parsed to
    * a RegionInfo object when completed.
    */
-  Deferred<Object> locateRegionBeforeKey(final HBaseRpc request,
+  Deferred<Object> locateRegionClosestBeforeKey(final HBaseRpc request,
                                          final byte[] table, final byte[] key) {
     return locateRegion(request, table, key, true, true);
   }
