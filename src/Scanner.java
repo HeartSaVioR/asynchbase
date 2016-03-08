@@ -211,32 +211,32 @@ public final class Scanner {
   /**
   * Returns boolean indicating if scanner is in reversed direction
   */
-  public boolean getReversed(){
+  public boolean isReversed(){
     return is_reversed;
   }
 
   /**
   * Specifies if the scan will be in reverse or not
-  * @param to_reverse Indication of scan direction. If this is not
+  * @param reversed Indication of scan direction. If this is not
   * invoked, scanning will default to not being reversed.
   *
   * In a reversed scan, the first Scanner opened is opened on the region
-  * that the Scanner start key is in (the same as forward scan). But 
-  * subsequent scanners are opened via the overloaded 
-  * {@link #OpenScannerRequest} and the region to be opened on is 
+  * that the Scanner start key is in (the same as forward scan). But
+  * subsequent scanners are opened via the overloaded
+  * {@link #OpenScannerRequest} and the region to be opened on is
   * found through a META lookup using
    * {@link HBaseClient#locateRegionClosestBeforeKey}.
-  * 
+  *
   */
-  public void setReverse(){
+  public void setReversed(boolean reversed){
     checkScanningNotStarted();
     is_reversed = true;
   }
 
   /**
-  * Returns boolean indicating if this is the first scanner opened on 
-  * a reverse scan. This is different from the subsequent scanners opened 
-  * in reverse scan because it is the only scanner whose region is found by 
+  * Returns boolean indicating if this is the first scanner opened on
+  * a reverse scan. This is different from the subsequent scanners opened
+  * in reverse scan because it is the only scanner whose region is found by
   * looking up the key
   */
   public boolean isFirstReverseRegion(){
@@ -734,7 +734,7 @@ public final class Scanner {
     if (region == DONE) {  // We're already done scanning.
       return Deferred.fromResult(null);
     } else if (region == null) {  // We need to open the scanner first.
-      if (this.getReversed() && !this.isFirstReverseRegion()){
+      if (this.isReversed() && !this.isFirstReverseRegion()){
         return client.openReverseScanner(this)
                 .addCallbackDeferring(opened_scanner);
       } else {
@@ -788,7 +788,7 @@ public final class Scanner {
             return "scanner opened";
           }
         };
-    
+
 
   /**
    * Singleton callback to handle responses of "next" RPCs.
@@ -929,13 +929,13 @@ public final class Scanner {
     // greater than or equal to the stop_key of this scanner provided
     // that (2) we're not trying to scan until the end of the table).
     // or if the scanner is reversed, (4) it's the first region or
-    // (6) scanner is in reverse and stop_key is after the region start_key 
+    // (6) scanner is in reverse and stop_key is after the region start_key
     // provided that (5) we are not trying to scan until the beginning.
-    if ((!is_reversed && 
+    if ((!is_reversed &&
         (region_stop_key == EMPTY_ARRAY ||                            // (1)
           (stop_key != EMPTY_ARRAY &&                                 // (2)
-          Bytes.memcmp(stop_key, region_stop_key) <= 0 )))            // (3)   
-      || (is_reversed && 
+          Bytes.memcmp(stop_key, region_stop_key) <= 0 )))            // (3)
+      || (is_reversed &&
         (region_start_key == EMPTY_ARRAY ||                           // (4)
           (stop_key != EMPTY_ARRAY &&                                 // (5)
           Bytes.memcmp(stop_key, region_start_key) >= 0)))){          // (6)
@@ -1238,7 +1238,7 @@ public final class Scanner {
   final class OpenScannerRequest extends HBaseRpc {
 
     /**
-     * Default constructor that is used for every forward Scanner and 
+     * Default constructor that is used for every forward Scanner and
      * for the first Scanner in a reverse Scan
      */
     public OpenScannerRequest() {
@@ -1282,7 +1282,6 @@ public final class Scanner {
       size += start_key.length;  // The start key.
       size += 3;  // vint: stop key length (3 bytes => max length = 32768).
       size += stop_key.length;  // The stop key.
-      size += 1;  // bool: Whether the scanner is in reverse
       size += 4;  // int:  Max number of versions to return.
       size += 4;  // int:  Max number of KeyValues to get per RPC.
       size += 4;  // int:  Unused field only used by HBase's client.

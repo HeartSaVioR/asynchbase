@@ -306,7 +306,7 @@ final public class TestIntegration {
     final double kvts = kv.timestamp();
     assertEquals(write_time, kvts, 5000.0);  // Within five seconds.
   }
-  
+
   @Test
   public void appendTwiceBatchedNoReturnRead() throws Exception {
     truncateTable(table);
@@ -328,7 +328,7 @@ final public class TestIntegration {
     final double kvts = kv.timestamp();
     assertEquals(write_time, kvts, 5000.0);  // Within five seconds.
   }
-  
+
   @Test
   public void appendTwiceBatchedReturnRead() throws Exception {
     truncateTable(table);
@@ -1209,7 +1209,7 @@ final public class TestIntegration {
     scanner.setFamily(family);
     scanner.setStartKey("flr9");
     scanner.setStopKey("flr0");
-    scanner.setReverse();
+    scanner.setReversed(true);
     scanner.setFilter(new FilterList(filters));
     final ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
     scanner.close().join();
@@ -1376,7 +1376,7 @@ final public class TestIntegration {
         final Scanner scanner = client.newScanner(table);
         scanner.setStartKey("brs9");
         scanner.setStopKey("brs0");
-        scanner.setReverse();
+        scanner.setReversed(true);
         // Callback class to keep scanning recursively.
         class cb implements Callback<Object, ArrayList<ArrayList<KeyValue>>> {
             private int n = 4; // Asserts will start at the last added values
@@ -1430,7 +1430,7 @@ final public class TestIntegration {
     final Scanner rev_scanner = client.newScanner(table);
     rev_scanner.setStartKey("rl9");   // Start key is inclusive
     rev_scanner.setStopKey("rl0");    // Stop key is exclusive
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
 
     final ArrayList<ArrayList<KeyValue>> rev_rows = rev_scanner.nextRows().join();
     rev_scanner.close().join();
@@ -1468,7 +1468,7 @@ final public class TestIntegration {
     Scanner scan = client.newScanner(table);
     scan.setStartKey("intrar1");
     scan.setStopKey("intrar0");
-    scan.setReverse();
+    scan.setReversed(true);
 
     ArrayList<ArrayList<KeyValue>> rows = scan.nextRows().join();
     scan.close().join();
@@ -1494,7 +1494,7 @@ final public class TestIntegration {
     rev_scanner.setFamily(family);
     rev_scanner.setStartKey("rfc9");
     rev_scanner.setStopKey("rfc0");
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
     final ArrayList<ArrayList<KeyValue>> rev_rows = rev_scanner.nextRows().join();
     rev_scanner.close().join();
     assertSizeIs(3, rev_rows);
@@ -1538,12 +1538,12 @@ final public class TestIntegration {
     client.put(put1).join();
 
     final Scanner rev_scanner_1 = client.newScanner(table1);
-    rev_scanner_1.setReverse();
+    rev_scanner_1.setReversed(true);
     rev_scanner_1.setStartKey("rmt3");
     rev_scanner_1.setStopKey("rmt0");
 
     final Scanner rev_scanner_2 = client.newScanner(table2);
-    rev_scanner_2.setReverse();
+    rev_scanner_2.setReversed(true);
     rev_scanner_2.setStartKey("rmt3");
     rev_scanner_2.setStopKey("rmt0");
 
@@ -1578,8 +1578,8 @@ final public class TestIntegration {
 
     // In Hbase shell, splits the table into two regions and sees update in stdout
     splitTable(table, "sar4");
-    alterTableStatus(table); 
-    
+    alterTableStatus(table);
+
     final Scanner scanner = client.newScanner(table);
     scanner.setStartKey("sar0".getBytes());
     scanner.setStopKey("sar5".getBytes());
@@ -1616,7 +1616,7 @@ final public class TestIntegration {
     final Scanner rev_scanner = client.newScanner(table);
     rev_scanner.setStartKey("rsar3".getBytes());
     rev_scanner.setStopKey("rsar0".getBytes());
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
 
     ArrayList<ArrayList<KeyValue>> row = rev_scanner.nextRows().join();
     assertSizeIs(1, row);
@@ -1653,7 +1653,7 @@ final public class TestIntegration {
     final Scanner rev_scanner = client.newScanner(table);
     rev_scanner.setStartKey("rw4".getBytes());
     rev_scanner.setStopKey("rw0".getBytes());
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
 
     ArrayList<ArrayList<KeyValue>> row = rev_scanner.nextRows().join();
     assertSizeIs(1, row);
@@ -1671,7 +1671,7 @@ final public class TestIntegration {
   }
 
   /**
-   * Reverse scan then forward scan over same rows and confirm results 
+   * Reverse scan then forward scan over same rows and confirm results
    * are the same but in opposite order. */
   @Test
   public void alternatingReverseScanForwardScanOverSameValues() throws Exception{
@@ -1714,11 +1714,11 @@ final public class TestIntegration {
         }
       }
     }
-  
+
   }
 
-  /** 
-   * Corner case test that when start and stop key are the same, forward scan 
+  /**
+   * Corner case test that when start and stop key are the same, forward scan
    * returns one row while reverse scan returns 0 rows.
    */
   @Test
@@ -1742,7 +1742,7 @@ final public class TestIntegration {
     Scanner rev_scanner = client.newScanner(table);
     rev_scanner.setStartKey("css0");
     rev_scanner.setStopKey("css0");
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
     ArrayList<ArrayList<KeyValue>> rev_row = rev_scanner.nextRows().join();
     rev_scanner.close().join();
     if (rev_row == null){
@@ -1751,9 +1751,9 @@ final public class TestIntegration {
     assertSizeIs(0, rev_row);
   }
 
-  /** 
-   * Reverse scan of a table that is only one region and 
-   * scanning without the start key and scanning without the stop key. 
+  /**
+   * Reverse scan of a table that is only one region and
+   * scanning without the start key and scanning without the stop key.
    */
   @Test
   public void reverseScanWithOptionalParams() throws Exception{
@@ -1771,7 +1771,7 @@ final public class TestIntegration {
 
     Scanner rev_scanner = client.newScanner(table2);
     rev_scanner.setStartKey("scop1");
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
     ArrayList<ArrayList<KeyValue>> rows = rev_scanner.nextRows().join();
     rev_scanner.close().join();
     assertSizeIs(2, rows);
@@ -1779,7 +1779,7 @@ final public class TestIntegration {
     assertEq("val0", rows.get(1).get(0).value());
 
     Scanner rev_scanner_2 = client.newScanner(table2);
-    rev_scanner_2.setReverse();
+    rev_scanner_2.setReversed(true);
     rev_scanner_2.setStopKey("scop1");
     rows = rev_scanner_2.nextRows().join();
     rev_scanner_2.close().join();
@@ -1813,17 +1813,17 @@ final public class TestIntegration {
     assertSizeIs(2, rows);
     assertEq("val1", rows.get(0).get(0).value());
     assertEq("val0", rows.get(1).get(0).value());
- 
+
     rows = genericScanGetAllAcrossRegions(null, "scop1", table3, true);
     assertSizeIs(2, rows);
     assertEq("val3", rows.get(0).get(0).value());
-    assertEq("val2", rows.get(1).get(0).value()); 
+    assertEq("val2", rows.get(1).get(0).value());
   }
 
   /* Helper function that creates scanner and calls nextRows until the result is null */
   private ArrayList<ArrayList<KeyValue>> genericScanGetAllAcrossRegions (
     String start_key, String stop_key, String table, boolean direction) throws Exception{
-    
+
     Scanner scanner = client.newScanner(table);
     if (start_key != null){
       byte[] start_row = start_key.getBytes();
@@ -1834,7 +1834,7 @@ final public class TestIntegration {
       scanner.setStopKey(stop_key);
     }
     if (direction){
-      scanner.setReverse();      
+      scanner.setReversed(true);
     }
 
     ArrayList<ArrayList<KeyValue>> new_row = scanner.nextRows().join();
@@ -1864,7 +1864,7 @@ final public class TestIntegration {
     client.put(put5).join();
 
     Scanner scanner = client.newScanner(table);
-    scanner.setReverse();
+    scanner.setReversed(true);
     scanner.setMaxNumBytes(250); // 250 bytes limit
     scanner.setStartKey("rsmb2");
     scanner.setStopKey("rsmb0");
@@ -1873,7 +1873,7 @@ final public class TestIntegration {
     // JVM adds around 40 bytes for each object so total is around 65 bytes
     ArrayList<ArrayList<KeyValue>> rows = scanner.nextRows().join();
     scanner.close().join();
-    assertSizeIs(2, rows); 
+    assertSizeIs(2, rows);
     // Even though 5 KVs is more than 250 bytes, we verify that HBase does not
     // truncate rows in the middle
     assertEq(long_val+"3", rows.get(0).get(0).value());
@@ -1884,8 +1884,8 @@ final public class TestIntegration {
 
   }
 
-  /** 
-   * Set a max number of key values to be returned and verify that a reversed scanner 
+  /**
+   * Set a max number of key values to be returned and verify that a reversed scanner
    * conforms to max kvs limit just like the forward scanner */
   @Test
   public void reverseAndForwardScanMoreThanMaxKVs() throws Exception{
@@ -1900,7 +1900,7 @@ final public class TestIntegration {
     client.put(put4).join();
 
     Scanner rev_scanner = client.newScanner(table);
-    rev_scanner.setReverse();
+    rev_scanner.setReversed(true);
     rev_scanner.setMaxNumKeyValues(2); // Sets the max number of KVs returned per row
     rev_scanner.setStartKey("rsmk3");
     rev_scanner.setStopKey("rsmk");
