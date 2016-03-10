@@ -2443,11 +2443,11 @@ public final class HBaseClient {
         if (e instanceof TableNotFoundException) {
           return new TableNotFoundException(table);  // Populate the name.
         } else if (e instanceof RecoverableException) {
-          // Retry to locate the region.  TODO(tsuna): exponential backoff?
-          // XXX this can cause an endless retry loop (particularly if the
-          // address of -ROOT- in ZK is stale when we start, this code is
-          // going to retry in an almost-tight loop until the znode is
-          // updated).
+          // Retry to locate the region if we haven't tried too many times.
+          // TODO(tsuna): exponential backoff?
+          if (cannotRetryRequest(request)) {
+            return tooManyAttempts(request, null);
+          }
           request.attempt++;
           return locateRegion(request, table, key, closest_before,
                   return_location);
